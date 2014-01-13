@@ -22,3 +22,11 @@ The `Define` and `DefineVersion` functions are used to define a migration
 and the SQL that will be executed for it. The `Migrate` function actually
 executes the migrations. An `error` will be returned from `Migrate` if
 anything bad happens.
+
+## How it works
+
+Mig will create a `db_version` table in your database with a `version int`
+column. Each migration will be executed in the order they're defined in
+unless there's a corresponding row in the `db_version` table. After each
+successful migration a row will be inserted in `db_version` for that
+migration.
