@@ -1,5 +1,7 @@
 # mig
 
+[![GoDoc](https://godoc.org/github.com/jagregory/mig?status.png)](https://godoc.org/github.com/jagregory/mig)
+
 Go SQL migration package
 
 ## Usage
