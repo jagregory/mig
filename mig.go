@@ -14,6 +14,9 @@ type migration struct {
 
 var migrations = make([]migration, 0, 100)
 
+// Quiet will supress status output on STDOUT if true
+var Quiet = false
+
 // Define will define and register a migration for running the next time
 // Mig is run. A version is automatically chosen based on the sequence of
 // previous calls to Define (aka version=len(migrations)+1).
@@ -44,7 +47,7 @@ func DefineVersion(version int, script string) {
 // If this is the first time Mig has been run, Migrate will first create
 // a db_version table and store a zero row.
 func Migrate(db *sql.DB) error {
-	fmt.Println("Running migrations")
+	logln("Running migrations")
 
 	if err := createVersionTable(db); err != nil {
 		return MigrationError{err, 0}
@@ -57,7 +60,7 @@ func Migrate(db *sql.DB) error {
 		}
 
 		if ok {
-			fmt.Printf("Executing #%d...", m.version)
+			logf("Executing #%d...", m.version)
 
 			if err := execute(m.script, db); err != nil {
 				return MigrationError{err, m.version}
@@ -67,13 +70,13 @@ func Migrate(db *sql.DB) error {
 				return MigrationError{err, m.version}
 			}
 
-			fmt.Println(" done.")
+			logln(" done.")
 		} else {
-			fmt.Printf("Skipping #%d, already run\n", m.version)
+			logf("Skipping #%d, already run\n", m.version)
 		}
 	}
 
-	fmt.Println("Migration complete")
+	logln("Migration complete")
 	return nil
 }
 
@@ -126,4 +129,16 @@ func insertVersion(version int, db *sql.DB) error {
 	sql := fmt.Sprintf("insert into db_version (version) values (%d);", version)
 	_, err := db.Exec(sql)
 	return err
+}
+
+func logf(format string, a ...interface{}) {
+	if !Quiet {
+		fmt.Printf(format, a)
+	}
+}
+
+func logln(a ...interface{}) {
+	if !Quiet {
+		fmt.Println(a)
+	}
 }
